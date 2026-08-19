@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { afterNavigate, goto } from '$app/navigation';
+  import { afterNavigate, beforeNavigate, goto } from '$app/navigation';
   import { page } from '$app/state';
   import ActionMenuItem from '$lib/components/ActionMenuItem.svelte';
   import OnEvents from '$lib/components/OnEvents.svelte';
@@ -18,7 +18,7 @@
   import SetVisibilityAction from '$lib/components/timeline/actions/SetVisibilityAction.svelte';
   import TagAction from '$lib/components/timeline/actions/TagAction.svelte';
   import AssetSelectControlBar from '$lib/components/timeline/AssetSelectControlBar.svelte';
-  import { QueryParameter } from '$lib/constants';
+  import { QueryParameter, SessionStorageKey } from '$lib/constants';
   import { assetMultiSelectManager } from '$lib/managers/asset-multi-select-manager.svelte';
   import { authManager } from '$lib/managers/auth-manager.svelte';
   import { featureFlagsManager } from '$lib/managers/feature-flags-manager.svelte';
@@ -81,6 +81,12 @@
     }
   });
 
+  beforeNavigate(() => {
+    if (scrollYHistory) {
+      sessionStorage.setItem(SessionStorageKey.SCROLL_POSITION, scrollYHistory.toString());
+    }
+  });
+
   afterNavigate(({ from }) => {
     // Prevent setting previousRoute to the current page.
     if (from?.url && from.route.id !== page.route.id) {
@@ -94,6 +100,13 @@
 
     if (isAlbumsRoute(route)) {
       previousRoute = Route.explore();
+    }
+
+    // Restore scroll position from sessionStorage if available
+    const savedScrollY = sessionStorage.getItem(SessionStorageKey.SCROLL_POSITION);
+    if (savedScrollY) {
+      scrollYHistory = Number(savedScrollY);
+      sessionStorage.removeItem(SessionStorageKey.SCROLL_POSITION);
     }
 
     tick()

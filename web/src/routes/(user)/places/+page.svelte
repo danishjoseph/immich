@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { scrollMemory } from '$lib/actions/scroll-memory';
   import UserPageLayout from '$lib/components/layouts/UserPageLayout.svelte';
   import PlacesControls from './PlacesControls.svelte';
   import type { PageData } from './$types';
@@ -35,6 +36,14 @@
 <UserPageLayout
   title={$t('places')}
   description={countVisiblePlaces === 0 && !searchQuery ? undefined : `(${countVisiblePlaces.toLocaleString($locale)})`}
+  use={[
+    [
+      scrollMemory,
+      {
+        routeStartsWith: '/',
+      },
+    ],
+  ]}
 >
   {#snippet buttons()}
     <div class="flex place-items-center gap-2">
